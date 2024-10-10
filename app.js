@@ -1,57 +1,81 @@
-const inputValue = document.getElementById('task-text');
-const addBtn = document.getElementById('add-btn');
+const add_btn = document.querySelector("#add-btn");
+const newTaskInput = document.querySelector("#wrapper input");
+const taskContainer = document.querySelector("#tasks");
+const error = document.getElementById("error");
+const countValue = document.querySelector(".count");
+let taskCount = 0;
 
-addBtn.addEventListener('click', taskFunction);
+const displayPendingTask = (taskCount) => {
+  countValue.innerHTML = taskCount;
+};
 
-const inputBox = document.getElementById('task-container');
-inputBox.style.display = "none";
-
-// function taskFunction () {
-//   let taskValue = document.getElementById('task');
-//   taskValue.innerHTML = inputValue.value;
-//   inputBox.style.display = "block";
-// }
-
-
-// function taskFunction() {
-//   inputBox.style.display = "block";
-//   const label = document.createElement("label");
-//   label.innerHTML = inputValue.value;
-//   label.classList.add('task');
-//   inputBox.appendChild(label);
-// }
-
-function taskFunction() {
-  inputBox.style.display = "block";
-  taskText = inputValue.value.trim();
-
-  if (taskText) {
-    const taskList = document.getElementById('taskList');
-    const listItem = document.createElement('li');
-    listItem.style.listStyleType = "none";
-    listItem.textContent = taskText;
-
-    const checkBox = document.createElement('input');
-    checkBox.type = 'checkbox';
-
-    checkBox.addEventListener('change', () => {
-      if (checkBox.checked) {
-        alert (`YAY! You have completed ${taskText}`);
-        listItem.remove();
-      }
-    });
-    
-    // const taskNode = document.createTextNode(taskText);
-
-    listItem.appendChild(checkBox);
-    // listItem.appendChild(taskNode);
-
-    task.appendChild(listItem);
-
-    inputValue.value = '';
-
-  } else {
-    alert('Please Enter your task');
+const addTask = () => {
+  const taskName = newTaskInput.value.trim();
+  error.style.display = "none";
+  if (!taskName) {
+    setTimeout(() => {
+      error.style.display = "block";
+    }, 200);
+    return;
   }
+  const task = `<div class= "task"> 
+<input type = "checkbox" class = "task-check">
+<span class = "taskName">${taskName}</span>
+<button class = "edit">
+<i class="fa-solid fa-pen-to-square"></i>
+</button>
+<button class = "delete">
+<i class="fa-solid fa-trash"></i>
+</button>
+</div>`;
 
+  taskContainer.insertAdjacentHTML("beforeend", task);
+
+  const deleteButtons = document.querySelectorAll(".delete");
+  deleteButtons.forEach(button => {
+    button.onclick = () =>{
+      button.parentNode.remove();
+      taskCount -= 1;
+      displayPendingTask(taskCount);
+    };
+  });
+
+  const editButtons = document.querySelectorAll(".edit");
+  editButtons.forEach((editBtn) => {
+    editBtn.onclick = (e) => {
+      let targetElement = e.target;
+      if (!e.target.className == "edit") {
+        targetElement = e.target.parentElement;
+      }
+      newTaskInput.value = targetElement.previousElementSibling?.innerText;
+      targetElement.parentNode.remove();
+      taskCount -= 1;
+      displayPendingTask(taskCount);
+    };
+  });
+
+  const taskCompleted = document.querySelectorAll(".task-check");
+  taskCompleted.forEach((checkBox) => {
+    checkBox.onchange = () => {
+      checkBox.nextElementSibling.classList.toggle("completed");
+      if (checkBox.checked) {
+        taskCount -= 1;
+      } else {
+        taskCount += 1;
+      }
+      displayPendingTask(taskCount);
+    };
+  });
+  taskCount += 1;
+  displayPendingTask(taskCount);
+  newTaskInput.value = "";
+};
+
+window.onload = () => {
+  taskCount = 0;
+  displayPendingTask(taskCount);
+  newTaskInput.value = "";
 }
+
+
+add_btn.addEventListener("click", addTask);
